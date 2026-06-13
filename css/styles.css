@@ -890,3 +890,16 @@ canvas {
   50% { transform: translateY(-20px); opacity: 1; }
   100% { transform: translateY(0px); opacity: 0.6; }
 }
+#rotateWarning {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    color: #fff;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    font-size: 1.4rem;
+    z-index: 999999;
+}
