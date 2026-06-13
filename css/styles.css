@@ -10,31 +10,6 @@ html, body {
     -webkit-touch-callout: none;
 }
 
-
-/* =====================================================
-   ORIENTACIÓN HORIZONTAL OBLIGATORIA
-   ===================================================== */
-
-@media screen and (orientation: portrait) {
-    body::before {
-        content: "Por favor gira el móvil para ver el universo ✦";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #000;
-        color: #fff;
-        font-size: 22px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-        z-index: 999999;
-    }
-}
-
 /* =====================================================
    RESET Y CONFIGURACIÓN GENERAL
    ===================================================== */
