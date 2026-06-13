@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <!-- VIEWPORT OPTIMIZADO PARA MÓVIL/TABLET -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0,
+                   maximum-scale=1.0, user-scalable=no">
+
+    <title>Paula - 15 Años en el Universo</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- INTRO -->
+    <div class="overlay-inicial" id="overlayInicial">
+
+        <div class="cometa-container">
+            <div class="cometa uno"></div>
+            <div class="cometa dos"></div>
+            <div class="cometa tres"></div>
+            <div class="cometa cuatro"></div>
+        </div>
+
+        <div class="overlay-content">
+            <h1 class="titulo-inicio" id="tituloIntro">
+                PAULA
+            </h1>
+
+            <p class="subtitulo-inicio">
+                15 AÑOS EN EL UNIVERSO
+            </p>
+
+            <button class="btn-play" id="btnPlay">
+                ✦ INICIAR VIAJE ✦
+            </button>
+        </div>
+
+    </div>
+
+    <!-- BOTÓN CONTINUAR -->
+    <button class="btn-siguiente" id="btnSiguiente">
+        CONTINUAR VIAJE ✦
+    </button>
+
+    <!-- DESTELLO -->
+    <div class="destello-blanco" id="destelloBlanco"></div>
+
+    <!-- SISTEMA SOLAR -->
+    <canvas id="canvas"></canvas>
+
+    <!-- PANEL -->
+    <div class="panel-planeta" id="panelPlaneta">
+
+        <div class="panel-planeta-nombre" id="panelPlanetaNombre"></div>
+
+        <h2 class="panel-titulo" id="panelTitulo"></h2>
+
+        <div class="panel-contenido" id="panelContenido"></div>
+
+        <button class="btn-cerrar-panel" id="btnCerrar">
+            Cerrar
+        </button>
+
+    </div>
+
+    <!-- LOADER -->
+    <div class="loader-text" id="loaderText">
+        Cargando Sistema Solar...
+    </div>
+
+    <!-- PARTE 2 -->
+    <div id="contenedorParte2"></div>
+
+    <!-- LIBRERÍAS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- TU APP -->
+    <script src="js/app.js"></script>
+
+</body>
+</html>
