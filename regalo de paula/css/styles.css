@@ -1,0 +1,917 @@
+/* =====================================================
+   OPTIMIZACIÓN MÓVIL/TABLET — BLOQUEO SCROLL/ZOOM
+   ===================================================== */
+
+html, body {
+    overflow: hidden;
+    touch-action: none; /* evita scroll accidental */
+    user-select: none;          /* ← estándar */
+    -webkit-user-select: none;  /* ← prefijo Safari/iOS */
+    -webkit-touch-callout: none;
+}
+
+
+/* =====================================================
+   ORIENTACIÓN HORIZONTAL OBLIGATORIA
+   ===================================================== */
+
+@media screen and (orientation: portrait) {
+    body::before {
+        content: "Por favor gira el móvil para ver el universo ✦";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000;
+        color: #fff;
+        font-size: 22px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+        z-index: 999999;
+    }
+}
+
+/* =====================================================
+   RESET Y CONFIGURACIÓN GENERAL
+   ===================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #020205;
+    font-family: 'Orbitron', sans-serif;
+    color: #ffffff;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* =====================================================
+   PANTALLA INICIAL (INTRO CINEMÁTICA PREMIUM)
+   ===================================================== */
+.overlay-inicial {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #1a0505 0%, #050101 50%, #020205 100%);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1.2s ease-in-out;
+    overflow: hidden;
+}
+
+.overlay-inicial::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+        radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+    background-size: 550px 550px, 350px 350px, 250px 250px;
+    background-position: 0 0, 40px 60px, 130px 270px;
+    opacity: 0.6;
+    animation: estrellasParpadeo 4s linear infinite alternate;
+}
+
+@keyframes estrellasParpadeo {
+    0% { opacity: 0.4; transform: scale(1); }
+    100% { opacity: 0.8; transform: scale(1.02); }
+}
+
+/* COMETAS DE LA INTRO */
+.cometa-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.cometa {
+    position: absolute;
+    background: linear-gradient(90deg, rgba(255, 0, 0, 0) 0%, rgba(255, 60, 60, 0.4) 75%, rgba(255, 255, 255, 1) 100%);
+    border-radius: 0 100% 100% 0; 
+    filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.9));
+    opacity: 0;
+}
+
+/* COMETAS (mantengo tus animaciones tal cual) */
+.cometa.uno { top: -100px; left: 10%; width: 380px; height: 5px; animation: cruceroCometaUno 8s linear infinite; animation-delay: 1s; }
+.cometa.dos { top: 5%; left: -200px; width: 460px; height: 6px; animation: cruceroCometaDos 7s linear infinite; animation-delay: 4.5s; }
+.cometa.tres { top: -80px; left: 50%; width: 320px; height: 4px; animation: cruceroCometaTres 10s linear infinite; animation-delay: 7s; }
+.cometa.cuatro { top: -120px; left: 75%; width: 280px; height: 4px; animation: cruceroCometaCuatro 9s linear infinite; animation-delay: 9.5s; }
+
+/* (Tus keyframes de cometas están perfectos, no los toco) */
+
+/* TITULO INICIO */
+.overlay-content {
+    text-align: center;
+    z-index: 11;
+    padding: 20px;
+}
+
+.titulo-inicio {
+    font-size: 6rem;
+    font-weight: 900;
+    letter-spacing: 20px;
+    background: linear-gradient(45deg, #ff003c, #ff3333, #ffffff, #ff0000, #990012);
+    background-size: 400% 400%;
+    -webkit-background-clip: text; /* Mantenemos este para Chrome/Safari */
+    background-clip: text;         /* 🌟 Añadimos este para solucionar el aviso */
+    -webkit-text-fill-color: transparent;
+    animation: brilloRojo 6s ease infinite, flotar 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(255, 0, 60, 0.6));
+    transition: filter 0.4s ease;
+}
+
+/* 🔥 ESTO FALTABA → por eso no brillaba */
+@keyframes brilloRojo {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+.subtitulo-inicio {
+    font-size: 1.3rem;
+    letter-spacing: 8px;
+    color: #ff9999;
+    margin-top: 25px;
+    margin-bottom: 60px;
+    font-weight: 400;
+    opacity: 0.9;
+    text-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+}
+
+.btn-play {
+    background: rgba(255, 0, 60, 0.05);
+    border: 2px solid rgba(255, 51, 51, 0.4);
+    padding: 18px 50px;
+    font-size: 1.1rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* =====================================================
+   BOTÓN SIGUIENTE
+   ===================================================== */
+.btn-siguiente {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 12px 24px;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 4; 
+    backdrop-filter: blur(6px);
+    transition: all 0.4s ease;
+    display: none;
+}
+
+/* =====================================================
+   EFECTOS CINEMÁTICOS DE LA SUPERNOVA
+   ===================================================== */
+.destello-blanco {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease-out; /* 🔥 Esto faltaba */
+}
+
+/* =====================================================
+   PANEL LATERAL
+   ===================================================== */
+.panel-planeta {
+    position: fixed;
+    top: 0;
+    right: -50vw;
+    width: 42vw;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(4, 2, 2, 0.88) 12%, rgba(10, 3, 3, 0.98) 100%);
+    backdrop-filter: blur(12px);
+    border-left: 1px solid rgba(255, 0, 60, 0.2);
+    z-index: 5;
+    padding: 80px 50px 60px 80px;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panel-planeta.activo {
+    right: 0;
+}
+
+#panelContenido {
+    white-space: pre-line;
+    font-family: "Quicksand", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #e8e8e8;
+    margin-top: 20px;
+}
+
+
+/* =====================================================
+   PARTE 2 KAWAII (KIKI Y LALA)
+   ===================================================== */
+#contenedorParte2 {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: #ffffff;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 200;
+}
+
+#contenedorParte2.activo {
+    display: flex;
+}
+
+.personaje {
+    position: absolute;
+    bottom: 0;
+    width: 250px;
+    transition: transform 0.5s ease-out;
+}
+
+#kiki { left: -300px; }
+#lala { right: -300px; }
+
+.entrar-kiki { transform: translateX(450px); }
+.entrar-lala { transform: translateX(-450px); }
+
+#cajaDialogo {
+    position: absolute;
+    bottom: 50px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 4px solid #ffb6c1;
+    border-radius: 25px;
+    padding: 25px;
+    width: 70%;
+    max-width: 600px;
+    text-align: center;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 1.2rem;
+    color: #ff69b4;
+    box-shadow: 0 10px 30px rgba(255, 182, 193, 0.5);
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+#cajaDialogo.visible {
+    opacity: 1;
+}
+
+/* =====================================================
+   CORRECCIÓN DE TIPOGRAFÍA PANEL Y BOTÓN
+   ===================================================== */
+.panel-planeta-nombre,
+.panel-titulo,
+.panel-contenido,
+.btn-cerrar-panel {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 2px;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.btn-cerrar-panel {
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* =====================================================
+   ANIMACIÓN DE KIKI Y LALA VOLANDO
+   ===================================================== */
+.volando {
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 300px;
+    opacity: 0;
+    transition: all 3s ease-out;
+}
+
+.entrar-volando {
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    opacity: 1;
+}
+
+/* =====================================================
+   ESCENA FINAL CON KIKI Y LALA
+   ===================================================== */
+.personajeFinal {
+    position: absolute;
+    bottom: 50%;
+    width: 250px;
+    opacity: 0;
+    transition: transform 1s ease-out, opacity 1s ease-out;
+}
+
+#kikiFinal { left: 10%; transform: translateY(50px); }
+#lalaFinal { right: 10%; transform: translateY(50px); }
+
+.entrar-kiki-final, .entrar-lala-final {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#cajaDialogoFinal {
+    position: absolute;
+    bottom: 20%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 4px solid #ffb6c1;
+    border-radius: 25px;
+    padding: 25px;
+    width: 70%;
+    max-width: 600px;
+    text-align: center;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 1.2rem;
+    color: #ff69b4;
+    box-shadow: 0 10px 30px rgba(255, 182, 193, 0.5);
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+#cajaDialogoFinal.visible {
+    opacity: 1;
+}
+.personaje, .personajeFinal, .volando {
+    z-index: 300;
+}
+@keyframes fondoKawaii {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.15); }
+}
+
+/* ============================================================
+   TARJETA DE CUMPLEAÑOS KAWAII (FASE 3)
+   ============================================================ */
+
+#tarjetaContainer {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    perspective: 1800px;
+    width: 90vw;
+    height: 80vh;
+    z-index: 9999;
+}
+
+#tarjeta {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1.5s ease;
+    cursor: pointer;
+}
+
+.cara {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    box-sizing: border-box;
+    font-family: "Comic Sans MS", cursive;
+}
+
+/* PORTADA */
+.cara-frontal {
+    border: 6px solid #ff9acb;
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(255, 182, 193, 0.6);
+    overflow: hidden;
+}
+
+.portada-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* INTERIOR */
+.cara-interior {
+    display: flex;
+    flex-direction: row; /* imagen izquierda, texto derecha */
+    width: 100%;
+    height: 100%;
+}
+
+/* LADO IZQUIERDO (imagen) */
+.lado-izquierdo {
+    width: 40%; /* achicado para que la imagen se vea entera */
+    height: 100%;
+    background-color: #ffeef6; /* fondo rosita */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.imagen-interior {
+    width: 85%; /* más pequeña para que se vea completa */
+    height: auto;
+    object-fit: contain; /* mantiene proporciones sin deformar */
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 150, 200, 0.3);
+}
+
+/* LADO DERECHO (texto) */
+.cara-interior {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* LADO DERECHO (texto) */
+.lado-derecho {
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    /* más espacio respecto a la imagen, pero dejando ancho para el texto */
+    padding: 60px 70px 60px 90px;
+    box-sizing: border-box;
+}
+
+/* TÍTULO */
+.titulo-interior {
+    font-family: "Pacifico", cursive;
+    font-size: 30px;          /* un pelín más pequeño para que no se salga */
+    color: #ff7ac4;
+    text-align: center;
+    margin-bottom: 25px;
+    width: 100%;
+    word-wrap: break-word;    /* evita que se desborde */
+}
+
+/* PÁRRAFOS */
+.lado-derecho p {
+    font-family: "Quicksand", sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 18px;
+    white-space: pre-line;
+    width: 100%;              /* usa todo el ancho disponible */
+    word-wrap: break-word;    /* por si alguna palabra es muy larga */
+}
+
+/* PÁRRAFO FINAL */
+.parrafo.final {
+    margin-top: 25px;
+    text-align: center;
+    font-weight: bold;
+    color: #ff69b4;
+}
+
+/* ANIMACIÓN DE APERTURA */
+.tarjeta-abierta {
+    transform: rotateY(-180deg);
+}
+#tarjetaContainer {
+    perspective: 2000px;
+}
+
+#tarjeta {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1s ease;
+    position: relative;
+}
+
+.cara {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+.cara-frontal {
+    transform: rotateY(0deg);
+}
+
+.cara-interior {
+    transform: rotateY(180deg);
+}
+
+.tarjeta-abierta {
+    transform: rotateY(180deg);
+}
+/* === PARTE 3 RETRO FINAL — BLOQUE 1 === */
+
+.parte3-retro {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  color: #fae3d9;
+  background: radial-gradient(circle at 50% 30%, #2a2a4a, #0f0f25 80%);
+  animation: retroSceneFadeIn 1.2s ease forwards;
+}
+
+/* Estrellas animadas */
+.star-retro {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: floatStar 6s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px white);
+}
+
+@keyframes floatStar {
+  0% { transform: translateY(0px); opacity: 0.6; }
+  50% { transform: translateY(-20px); opacity: 1; }
+  100% { transform: translateY(0px); opacity: 0.6; }
+}
+
+/* Animación de entrada */
+@keyframes retroSceneFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* === PARTE 3 RETRO FINAL — BLOQUE 2 === */
+
+/* Tarjeta principal retro */
+.retro-card {
+  position: relative;
+  z-index: 2;
+  width: 520px;
+  padding: 26px 30px;
+  border-radius: 18px;
+  background: rgba(15, 15, 37, 0.92);
+  border: 3px solid #fae3d9;
+  box-shadow:
+    0 0 24px rgba(0,0,0,0.7),
+    0 0 12px rgba(255,182,185,0.6);
+  text-align: center;
+  transform: translateY(30px);
+  opacity: 0;
+  animation: retroCardUp 1.4s ease forwards 0.4s;
+}
+
+@keyframes retroCardUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Título */
+.retro-title {
+  font-size: 16px;
+  margin-bottom: 14px;
+  color: #ffb6b9;
+  text-shadow:
+    0 0 8px rgba(255,182,185,0.8),
+    0 0 16px rgba(255,182,185,0.4);
+}
+
+/* Texto consola */
+.retro-text {
+  font-size: 10px;
+  line-height: 1.8;
+  min-height: 70px;
+  margin-bottom: 18px;
+  color: #fae3d9;
+}
+
+/* Botones retro */
+.retro-options {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.retro-btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid #fae3d9;
+  background: #1b1b3a;
+  color: #fae3d9;
+  font-size: 9px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(250,227,217,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  min-width: 110px;
+}
+
+.retro-btn span {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.retro-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 16px rgba(250,227,217,0.8);
+  background: #ffb6b9;
+  color: #1b1b3a;
+}
+
+/* Botón FINAL */
+.btn-final-retro {
+  margin-top: 20px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 2px solid #bbded6;
+  background: #0f0f25;
+  color: #bbded6;
+  font-size: 9px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(186,222,214,0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.btn-final-retro:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 16px rgba(186,222,214,0.9);
+  background: #bbded6;
+  color: #0f0f25;
+}
+/* === PARTE 3 RETRO FINAL — BLOQUE 3 (MODALES) === */
+
+/* Contenedor del modal */
+.retro-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.retro-modal.active {
+  display: flex;
+}
+
+/* Contenido base del modal */
+.retro-modal-content {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Botón cerrar general */
+.retro-modal-close {
+  position: absolute;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+}
+
+/* ============================
+      CARTA ESTILO TLANEX
+   ============================ */
+
+.retro-modal-content.carta {
+  background: #fff;
+  color: #1b1b3a;
+  font-family: "Patrick Hand", cursive;
+  line-height: 1.8;
+  border: 2px solid #e0a84f;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 22px,
+    rgba(0,0,0,0.05) 22px,
+    rgba(0,0,0,0.05) 23px
+  );
+  width: 420px;
+  height: auto;
+  padding: 40px;
+  border-radius: 12px;
+  position: relative;
+}
+
+/* Texto de la carta (subido un poco) */
+.retro-modal-content.carta .retro-modal-text {
+  margin-top: -20px;
+}
+
+/* Botón cerrar de la carta (más abajo) */
+.retro-modal-content.carta .retro-modal-close {
+  bottom: 0px;
+  right: 50%;
+  transform: translateX(50%);
+  color: #1b1b3a;
+}
+
+/* ============================
+      CORAZÓN GIGANTE
+   ============================ */
+
+.retro-modal-content.corazon {
+  background: #ff4d6d;
+  color: #fff;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  clip-path: polygon(
+    50% 15%,
+    61% 0%,
+    75% 0%,
+    100% 25%,
+    50% 100%,
+    0% 25%,
+    25% 0%,
+    39% 0%
+  );
+  width: 520px;
+  height: 460px;
+  box-shadow: 0 0 20px rgba(255,77,109,0.8);
+  padding: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Texto del corazón */
+.retro-modal-content.corazon .retro-modal-text {
+  margin-top: -30px;
+}
+
+/* Botón cerrar del corazón (SUBIDO un poco más) */
+.retro-modal-content.corazon .retro-modal-close {
+  bottom: 35px;   /* ← SUBIDO (antes estaba en 20px) */
+  right: 50%;
+  transform: translateX(50%);
+  color: #fff;
+}
+/* ============================
+      ESTRELLA GIGANTE
+   ============================ */
+
+.retro-modal-content.estrella {
+  background: #ffd27f;
+  color: #1b1b3a;
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  width: 620px;
+  height: 620px;
+  box-shadow: 0 0 20px rgba(255,210,127,0.8);
+  padding: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Texto dentro de la estrella (subido un poco más) */
+.retro-modal-content.estrella .retro-modal-text {
+  font-size: 10px;
+  line-height: 1.6;
+  margin-top: -120px;
+}
+
+/* Botón cerrar de la estrella (más abajo) */
+.retro-modal-content.estrella .retro-modal-close {
+  position: relative;
+  margin-top: 70px;
+  color: #1b1b3a;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+
+/* === PARTE 3 RETRO FINAL — BLOQUE 4 (PANTALLA FINAL UNIVERSO) === */
+
+.parte3-universo-retro {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 20%, #bbded6 0%, #1b1b3a 50%, #0b0b1a 100%);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  color: #fae3d9;
+  animation: universoFadeIn 1.2s ease forwards;
+}
+
+/* Contenedor de estrellas */
+.universo-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Estrellas individuales */
+.universo-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #fae3d9;
+  box-shadow: 0 0 8px rgba(250,227,217,0.9);
+  border-radius: 50%;
+  animation: universoStarFloat 8s ease-in-out infinite;
+}
+
+/* Texto central */
+.universo-text {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.8),
+    0 0 20px rgba(255,255,255,0.5);
+}
+
+.universo-text h1 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.universo-text p {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+/* === ANIMACIONES === */
+
+@keyframes universoFadeIn {
+  from { opacity: 0; transform: scale(1.03); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes universoStarFloat {
+  0% { transform: translateY(0px); opacity: 0.6; }
+  50% { transform: translateY(-20px); opacity: 1; }
+  100% { transform: translateY(0px); opacity: 0.6; }
+}
