@@ -1231,5 +1231,23 @@ function mostrarPantallaFinal() {
     starsContainer.appendChild(star);
   }
 }
+function checkOrientation() {
+    const warning = document.getElementById("rotateWarning");
 
+    if (window.innerHeight > window.innerWidth) {
+        // Móvil en vertical → mostrar aviso
+        warning.style.display = "flex";
+        document.body.style.overflow = "hidden";
+    } else {
+        // Móvil en horizontal → ocultar aviso
+        warning.style.display = "none";
+        document.body.style.overflow = "hidden";
+    }
+}
+
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+
+// Ejecutar al cargar
+checkOrientation();
 window.addEventListener("load", init);
